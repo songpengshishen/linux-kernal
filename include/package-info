@@ -1,0 +1,1 @@
+目录包括编译核心所需要的大部分头文件，例如与平台相关的头文件在/include/linux子目录下，与intel cpu相关的头文件在/include/asm-i386子目录下,而/include/scsi目录则是有关scsi设备的头文件目录
