@@ -3,10 +3,11 @@
  *
  *  Copyright (C) 1991, 1992  Linus Torvalds
  *
- *  Enhanced CPU detection and feature setting code by Mike Jagdis
+ *  Enhanced CPU detection and  setting code by Mike Jagdis
  *  and Martin Mares, November 1997.
+ *  Linux 针对InterI386及以后的32,64位cpu启动代码
  */
-
+/* 代码段 start */
 .text
 #include <linux/config.h>
 #include <linux/threads.h>
@@ -440,13 +441,19 @@ ENTRY(boot_gdt_table)
 	.quad 0x00cf92000000ffff	/* kernel 4GB data at 0x00000000 */
 #endif
 	.align L1_CACHE_BYTES
-ENTRY(cpu_gdt_table)
-	.quad 0x0000000000000000	/* NULL descriptor */
+	/*汇编中entry伪指令用来指明程序的入口点,至少有一个,多个情况下由链接器决定*/
+	/*这里创建一个cpu_gdt_table数组用来保存所有cpu的gdt(全局段描述符表用来保存段描述符)*/
+	/*每一个CPU都有一个GDT,GDT全局段描述符表用来存储段描述符*/
+    /*段描述符:是一个8字;,节的对象,保存了内存某一个段的属性*/
+    /*每个GDT中一共有 3,2个段描述符对象,其中14个空的18使用的*/
+ENTRY(cpu_gdt_table);
+	.quad 0x0000000000000//.000	/* NULL descriptor */
 	.quad 0x0000000000000000	/* 0x0b reserved */
 	.quad 0x0000000000000000	/* 0x13 reserved */
 	.quad 0x0000000000000000	/* 0x1b reserved */
 	.quad 0x0000000000000000	/* 0x20 unused */
 	.quad 0x0000000000000000	/* 0x28 unused */
+	/*3个线程局部存储段,每一个正在运行的进程最多可以有3个线程局部存储段*/
 	.quad 0x0000000000000000	/* 0x33 TLS entry 1 */
 	.quad 0x0000000000000000	/* 0x3b TLS entry 2 */
 	.quad 0x0000000000000000	/* 0x43 TLS entry 3 */
@@ -454,13 +461,14 @@ ENTRY(cpu_gdt_table)
 	.quad 0x0000000000000000	/* 0x53 reserved */
 	.quad 0x0000000000000000	/* 0x5b reserved */
 
-	.quad 0x00cf9a000000ffff	/* 0x60 kernel 4GB code at 0x00000000 */
-	.quad 0x00cf92000000ffff	/* 0x68 kernel 4GB data at 0x00000000 */
-	.quad 0x00cffa000000ffff	/* 0x73 user 4GB code at 0x00000000 */
-	.quad 0x00cff2000000ffff	/* 0x7b user 4GB data at 0x00000000 */
+	.quad 0x00cf9a000000ffff	/* 0x60 kernel 4GB code at 0x00000000 * 内核代码段/
+	.quad 0x00cf92000000ffff	/* 0x68 kernel 4GB data at 0x00000000 * 内核数据段/
+	/*当前GDT所属的CPU正在执行的用户进程的数据段和代码段*/
+	.quad 0x00cffa000000ffff	/* 0x73 user 4GB code at 0x00000000 * 用户代码段/
+	.quad 0x00cff2000000ffff	/* 0x7b user 4GB data at 0x00000000 * 用户数据段/
 
-	.quad 0x0000000000000000	/* 0x80 TSS descriptor */
-	.quad 0x0000000000000000	/* 0x88 LDT descriptor */
+	.quad 0x0000000000000000	/* 0x80 TSS descriptor * 任务状态段 每个CPU和GDT都只有一项,该段只可以在内核下访问/
+	.quad 0x0000000000000000	/* 0x88 LDT descriptor 局部段描述符表段,每个进程独有的 */
 
 	/* Segments used for calling PnP BIOS */
 	.quad 0x00c09a0000000000	/* 0x90 32-bit code */
@@ -481,7 +489,7 @@ ENTRY(cpu_gdt_table)
 	.quad 0x0000000000000000	/* 0xe0 - unused */
 	.quad 0x0000000000000000	/* 0xe8 - unused */
 	.quad 0x0000000000000000	/* 0xf0 - unused */
-	.quad 0x0000000000000000	/* 0xf8 - GDT entry 31: double-fault TSS */
+	.quad 0x0000000000000000	/* 0xf8 - GDT entry 31: double-fault TSS 双重错误段*/
 
 #ifdef CONFIG_SMP
 	.fill (NR_CPUS-1)*GDT_ENTRIES,8,0 /* other CPU's GDT */
