@@ -361,7 +361,7 @@ ignore_int:
  */
 
 .globl idt_descr
-.globl cpu_gdt_descr
+.globl cpu_gdt_descr /*用来存储所有的GDT地址和GDT长度的,在初始化某一个CPU的GDTR寄存器时使用,把相应的GDT基地址放到寄存器中.*/
 
 	ALIGN
 	.word 0				# 32-bit align idt_desc.address
@@ -444,8 +444,8 @@ ENTRY(boot_gdt_table)
 	/*汇编中entry伪指令用来指明程序的入口点,至少有一个,多个情况下由链接器决定*/
 	/*这里创建一个cpu_gdt_table数组用来保存所有cpu的gdt(全局段描述符表用来保存段描述符)*/
 	/*每一个CPU都有一个GDT,GDT全局段描述符表用来存储段描述符*/
-    /*段描述符:是一个8字;,节的对象,保存了内存某一个段的属性*/
-    /*每个GDT中一共有 3,2个段描述符对象,其中14个空的18使用的*/
+    /*段描述符:是一个8字节的对象,保存了内存某一个段的属性*/
+    /*每个GDT中一共有32个段描述符对象,其中14个空的18使用的*/
 ENTRY(cpu_gdt_table);
 	.quad 0x0000000000000//.000	/* NULL descriptor */
 	.quad 0x0000000000000000	/* 0x0b reserved */
