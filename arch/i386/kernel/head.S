@@ -50,9 +50,8 @@
 	cmp $empty_zero_page - __PAGE_OFFSET, %edi; \
 	jne 2b;
 
-/*
+/* 用于创建内核的临时页全局目录,使用swapper_pg_dir指向页全局目录.
  * swapper_pg_dir is the main page directory, address 0x00101000
- *
  * On entry, %esi points to the real-mode code as a 32-bit pointer.
  */
 ENTRY(startup_32)
@@ -64,8 +63,8 @@ ENTRY(startup_32)
 	orw %bx, %bx
 	jnz 1f
 	INIT_PAGE_TABLES
-	movl $swapper_pg_dir - __PAGE_OFFSET, %eax
-	movl %eax, %cr3
+	movl $swapper_pg_dir - __PAGE_OFFSET, %eax //获取临时全局页目录(swapper_pg_dir)的基地址
+	movl %eax, %cr3 //将页全局目录的基地址放入cr3寄存器.
 	lgdt boot_gdt
 1:
 #endif
@@ -378,6 +377,8 @@ cpu_gdt_descr:
 	.fill NR_CPUS-1,8,0		# space for the other GDT descriptors
 
 /*
+ * 这是在0-8m初始化创建的一个内存映射,是操作系统内核临时的页全局目录页表
+
  * This is initialized to create an identity-mapping at 0-8M (for bootup
  * purposes) and another mapping of the 0-8M area at virtual address
  * PAGE_OFFSET.

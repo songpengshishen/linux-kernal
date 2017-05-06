@@ -1,1 +1,1 @@
-目录包括编译Linux内核所需要的大部分头文件，例如与平台相关的头文件在/include/linux子目录下，与intel cpu相关的头文件在/include/asm-i386子目录下,而/include/scsi目录则是有关scsi设备的头文件目录
+目录包括编译Linux内核所需要的大部分头文件，按照硬件平台分配.例如与平台无关的头文件在/include/linux子目录下，与intel cpu相关的头文件在/include/asm-i386子目录下,而/include/scsi目录则是有关scsi设备的头文件目录

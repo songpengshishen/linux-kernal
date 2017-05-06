@@ -1,3 +1,4 @@
+/*linux内核中关于调度的头文件,其中保存了进程描述符task_struct对象*/
 #ifndef _LINUX_SCHED_H
 #define _LINUX_SCHED_H
 
@@ -329,10 +330,20 @@ struct k_itimer {
 
 struct io_context;			/* See blkdev.h */
 void exit_io_context(void);
-
+/*进程描述符结构-task_struct*/
 struct task_struct {
-	volatile long state;	/* -1 unrunnable, 0 runnable, >0 stopped */
-	struct thread_info *thread_info;
+    /*进程状态 -1 unrunnable, 0 runnable, >0 stopped */
+    /*现分为:
+       可运行状态:task_running;
+       可中断的等待状态:task_interruptible
+       不可中断的等待状态:task_uninterruptible
+       暂停状态:task_stopped
+       跟踪状态:task_traced
+       僵死状态:exit_zombie
+       僵死撤销状态:exit_dead
+    */
+	volatile long state;
+	struct thread_info *thread_info;/*进程的基本信息,包括*/
 	atomic_t usage;
 	unsigned long flags;	/* per process flags, defined below */
 	unsigned long ptrace;
@@ -365,7 +376,7 @@ struct task_struct {
 	/* ??? */
 	unsigned long personality;
 	int did_exec:1;
-	pid_t pid;
+	pid_t pid;/*进程标识符,pid是按照增序来赋值,新创建进程是前一个进程PID+1,默认上限为32767*/
 	pid_t __pgrp;		/* Accessed via process_group() */
 	pid_t tty_old_pgrp;
 	pid_t session;
